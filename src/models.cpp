@@ -129,7 +129,7 @@ std::optional<float> Card::getRetrievability(const std::tm& now) const
     const float decay = -0.5f;
     const float factor = std::pow(0.9f, 1/decay) - 1;
 
-    if (state == State.Review) {
+    if (state == State::Review) {
         time_t now_t = std::mktime(const_cast<std::tm*>(&now));
         time_t last_review_t = std::mktime(const_cast<std::tm*>(&lastReview));
         const seconds_diff = std::difftime(now_t, last_review_t);
@@ -152,23 +152,23 @@ SchedulingCards::~SchedulingCards() {}
 void SchedulingCards::updateState(const State& s)
 {
     switch (s) {
-        case State.New:
-            again.state = State.Learning;
-            hard.state = State.Learning;
-            good.state = State.Learning;
-            easy.state = State.Review;
+        case State::New:
+            again.state = State::Learning;
+            hard.state = State::Learning;
+            good.state = State::Learning;
+            easy.state = State::Review;
             break;
-        case State.Learning:
+        case State::Learning:
             again.state = state;
             hard.state = state;
-            good.state = State.Review;
-            easy.state = State.Review;
+            good.state = State::Review;
+            easy.state = State::Review;
             break;
-        case State.Review:
-            again.state = State.Relearning;
-            hard.state = State.Review;
-            good.state = State.Review;
-            easy.state = State.Review;
+        case State::Review:
+            again.state = State::Relearning;
+            hard.state = State::Review;
+            good.state = State::Review;
+            easy.state = State::Review;
             again.lapses += 1;
             break;
     }
@@ -182,17 +182,24 @@ void SchedulingCards::schedule(const std::tm& now, int hI, int gI, int eI)
     easy.scheduledDays = eI;
 
     std::time_t now_t = std::mktime(const_cast<std::tm*>(&now));
+    std::time_t delta_t = 0;
 
-    again.due = *(std::localtime(now_t + 5 * 60));
+    delta_t = now_t + 5 * 60;
+    again.due = *(std::gmtime(&delta_t));
 
     if (hI > 0) {
-        hard.due = *(std::localtime(now_t + hI * 60 * 60 * 24));
+        delta_t = now_t + hI * 60 * 60 * 24;
+        hard.due = *(std::gmtime(&delta_t));
     } else {
-        hard.due = *(std::localtime(now_t + 10 * 60));
+        delta_t = now_t + 10 * 60;
+        hard.due = *(std::gmtime(&delta_t));
     }
 
-    good.due = *(std::localtime(now_t + gI * 60 * 60 * 24));
-    easy.due = *(std::localtime(now_t + eI * 60 * 60 * 24));
+    delta_t = now_t + gI * 60 * 60 * 24;
+    good.due = *(std::gmtime(delta_t));
+
+    delta_t = now_t + eI * 60 * 60 * 24;
+    easy.due = *(std::gmtime(delta_t));
 }
 
 std::unordered_map<Rating, SchedulingInfo>

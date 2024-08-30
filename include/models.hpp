@@ -16,7 +16,7 @@ enum State {
 };
 
 enum Rating {
-    Again = 0,
+    Again = 1,
     Hard,
     Good,
     Easy,
