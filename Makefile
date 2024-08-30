@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -O3 -Wall -std=c++17
-CXXSRC = ./src/main.cpp
+CXXSRC = ./tests/test_fsrs.cpp
 CXXINCLUDE = ./include
 
 TARGET=space_repitition_algo
