@@ -93,7 +93,6 @@ void test_review_card() {
         Rating::Good,
         Rating::Good,
         Rating::Good,
-        Rating::Good,
         Rating::Again,
         Rating::Again,
         Rating::Good,
@@ -101,15 +100,15 @@ void test_review_card() {
         Rating::Good,
         Rating::Good,
         Rating::Good
-
     };
 
     std::vector<int> ivl_history = std::vector<int>();
 
     for (Rating rating : ratings) {
-        std::pair<Card, ReviewLog> t = f.reviewCard(Card(), rating, now);
-        ivl_history.push_back(t.first.scheduledDays);
-        now = card.due;
+	std::pair<Card, ReviewLog> t = f.reviewCard(card, rating, now);
+	card = t.first;
+	ivl_history.push_back(card.scheduledDays);
+	now = card.due;
     }
     
     std::vector<int> ivl_history_test = {
@@ -128,7 +127,7 @@ void test_review_card() {
         457
     };
 
-    for (int i = 0; i < ivl_history.size(); ++i) {
+    for (std::size_t i = 0; i < ivl_history.size(); ++i) {
         std::cout << "t: " << ivl_history_test[i] << " / i: " << ivl_history[i] << "\n";
     }
 
