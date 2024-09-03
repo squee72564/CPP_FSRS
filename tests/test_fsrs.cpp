@@ -8,6 +8,8 @@ void test_memo_state();
 void test_review_card();
 void test_datetime();
 void test_card_serialize();
+void test_reviewlog_serialize();
+void test_custom_scheduler_args();
 
 std::ostream& operator<<(std::ostream& os, const Rating r);
 std::ostream& operator<<(std::ostream& os, const State s);
@@ -42,6 +44,8 @@ int main() {
     test_memo_state();
     test_datetime();
     test_card_serialize();
+    test_reviewlog_serialize();
+    test_custom_scheduler_args();
 
     return 0;
 }
@@ -50,7 +54,7 @@ void test_repeat_default_arg()
 {
     std::cout << "--function: test_repeat_default_arg()\n\n";
 
-    FSRS f = FSRS(test_w, std::nullopt, std::nullopt);
+    FSRS f = FSRS();
 
     Card card = Card();
 
@@ -90,7 +94,7 @@ void test_memo_state()
 {
     std::cout << "--function: test_memo_state()\n\n";
 
-    FSRS f = FSRS(test_w, std::nullopt, std::nullopt);
+    FSRS f = FSRS(test_w);
 
     Card card = Card();
 
@@ -215,7 +219,7 @@ void test_datetime()
 {
     std::cout << "--function: test_datetime()\n\n";
 
-    FSRS f = FSRS(test_w, std::nullopt, std::nullopt);
+    FSRS f = FSRS();
 
     Card card = Card();
 
@@ -252,7 +256,7 @@ void test_card_serialize()
 {
     std::cout << "--function: test_card_serialize()\n\n";
 
-    FSRS f = FSRS(test_w, std::nullopt, std::nullopt);
+    FSRS f = FSRS();
 
     Card card = Card();
 
@@ -266,18 +270,183 @@ void test_card_serialize()
 
     std::unordered_map<std::string, std::string> card2_map = card2.toMap();
 
-    for (auto const& p : card_map) {
-        if (card2_map.find(p.first) == card2_map.end())
+    for (const auto& [key, val] : card_map) {
+        if (card2_map.find(key) == card2_map.end())
             continue;	
 
-        assert(card2_map[p.first] == p.second);
+        assert(card2_map[key] == val);
 
         std::cout
-            << "Card 1 [" << p.first << "] : "
-            << p.second
-            << "\tCard2 [" << p.first << "] : "
-            << card2_map[p.first] << "\n";
+            << "Card 1 [" << key << "] : "
+            << val 
+            << "\tCard2 [" << key << "] : "
+            << card2_map[key] << "\n";
     }
+
+    std::cout << std::endl;
+}
+
+void test_reviewlog_serialize()
+{
+    std::cout << "--function: test_reviewlog_serialize()\n\n";
+
+    FSRS f = FSRS();
+
+    Card card = Card();
+
+    // Repeat a card to get the review log
+    std::unordered_map<Rating, SchedulingInfo> scheduling_cards = f.repeat(card);
+
+    card = scheduling_cards[Rating::Again].card;
+
+    ReviewLog review_log = scheduling_cards[Rating::Again].reviewLog;
+
+    std::unordered_map<std::string, std::string> review_log_map = review_log.toMap();
+
+    ReviewLog review_log2 = ReviewLog::fromMap(review_log_map);
+
+    std::unordered_map<std::string, std::string> review_log_map2 = review_log2.toMap();
+
+    for (const auto& [key, val] : review_log_map) {
+        if (review_log_map2.find(key) == review_log_map2.end())
+            continue;	
+
+        assert(review_log_map2[key] == val);
+
+        std::cout
+            << "Review Log 1 [" << key << "] : "
+            << val 
+            << "\tReview Log 2 [" << key << "] : "
+            << review_log_map2[key] << "\n";
+    }
+
+    std::cout << std::endl;
+}
+
+void test_custom_scheduler_args()
+{
+    FSRS f = FSRS(
+	std::vector<float> {
+	    0.4197f,
+	    1.1869f,
+	    3.0412f,
+	    15.2441f,
+	    7.1434f,
+	    0.6477f,
+	    1.0007f,
+	    0.0674f,
+	    1.6597f,
+	    0.1712f,
+	    1.1178f,
+	    2.0225f,
+	    0.0904f,
+	    0.3025f,
+	    2.1214f,
+	    0.2498f,
+	    2.9466f,
+	    0.0f,
+	    0.6468f,
+	},
+	0.9f,
+	36500
+    );
+
+    Card card = Card();
+
+    time_t time = std::time(nullptr);
+    std::tm tm = *localtime(&time);
+    std::optional<std::tm> now = tm;
+
+    std::vector<Rating> ratings = {
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Again,
+	Rating::Again,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+	Rating::Good,
+    };
+
+    std::vector<int> ivl_history = std::vector<int>();
+
+    std::vector<int> test_ivl_history = {
+	0,
+	3,
+	13,
+	50,
+	163,
+	473,
+	0,
+	0,
+	12,
+	34,
+	91,
+	229,
+	541
+    };
+
+    assert(ratings.size() == test_ivl_history.size());
+
+    for (Rating rating : ratings) {
+	auto [card2, _] = f.reviewCard(card, rating, now);
+	card = card2;
+	ivl_history.push_back(card.scheduledDays);
+	time_t now_t = std::mktime(&card.due);
+	now = *std::localtime(&now_t);
+    }
+
+    for (std::size_t i = 0; i < ivl_history.size(); ++i) {
+	std::cout
+	    << "Rating: "
+	    << ratings[i]
+	    << "\n\tExpected interval: "
+	    << test_ivl_history[i]
+	    << ",\tActual Interval: "
+	    << ivl_history[i] << "\n";
+    }
+
+    assert(ivl_history == test_ivl_history);
+
+    // Initialize another scheduler and verify params are properly sey
+    std::optional<std::vector<float>> w = std::vector<float> {
+	0.1456f,
+	0.4186f,
+	1.1104f,
+	4.1315f,
+	5.2417f,
+	1.3098f,
+	0.8975f,
+	0.0000f,
+	1.5674f,
+	0.0567f,
+	0.9661f,
+	2.0275f,
+	0.1592f,
+	0.2446f,
+	1.5071f,
+	0.2272f,
+	2.8755f,
+	1.234f,
+	5.6789f,
+    };
+    std::optional<float> request_retention = 0.85f;
+    std::optional<float> max_interval = 3650;
+
+    FSRS f2 = FSRS(
+	w,
+	request_retention,
+	max_interval
+    );
+
+    assert(f2.p.w == w);
+    assert(f2.p.requestRetention == request_retention);
+    assert(f2.p.maximumInterval == max_interval);
 
     std::cout << std::endl;
 }
