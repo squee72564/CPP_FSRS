@@ -92,8 +92,6 @@ std::unordered_map<std::string, std::string> Card::toMap() const
         oss.clear();
         oss << std::put_time(&lastReview.value(), timeFmtStr.c_str());
         ret["lastReview"] = oss.str();
-    } else {
-        ret["lastReview"] = "N/A";
     }
 
     return ret;
@@ -115,9 +113,11 @@ Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
 
 
     std::optional<std::tm> lastReview = std::nullopt;
-    if (map.at("review") != "N/A") {
-        std::istringstream iss(map.at("review"));
-        iss >> std::get_time(&lastReview.value(), timeFmtStr.c_str());
+    if (map.find("lastReview") != map.end()) {
+        std::istringstream iss(map.at("lastReview"));
+	std:: tm time;
+        iss >> std::get_time(&time, timeFmtStr.c_str());
+	lastReview = time;
     }
 
     return Card(due, stability, difficulty, elapsedDays, scheduledDays, reps, lapses, state, lastReview);

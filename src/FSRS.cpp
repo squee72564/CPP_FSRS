@@ -26,9 +26,8 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
                                                         std::optional<std::tm> now)
 {
     if (!now.has_value()) {
-        auto curr_time_point = std::chrono::system_clock::now();
-        std::time_t tt = std::chrono::system_clock::to_time_t(curr_time_point);
-        std::tm tm = *std::localtime(&tt);
+	time_t now_t = std::time(nullptr);
+        std::tm tm = *std::localtime(&now_t);
         now = tm;
     }
 
