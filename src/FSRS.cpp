@@ -1,6 +1,8 @@
 #include "FSRS.hpp"
 
-FSRS::FSRS(std::vector<float> w, std::optional<float> requestRetention, std::optional<float> maximumInterval)
+FSRS::FSRS(std::optional<std::vector<float>> w,
+	   std::optional<float> requestRetention,
+	   std::optional<float> maximumInterval)
     : p{Parameters(w, requestRetention, maximumInterval)}
 {
     decay = -0.5f;
