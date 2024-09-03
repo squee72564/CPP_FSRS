@@ -1,7 +1,8 @@
 #ifndef FSRS_HPP
 #define FSRS_HPP
 
-#include <tuple>
+#include <algorithm>
+#include <utility>
 #include <optional>
 #include <ctime>
 #include <unordered_map>
@@ -16,17 +17,17 @@ public:
     float decay;
     float factor;
 
-    FSRS(std::vector<float> w, float requestRetention, float maximumInterval);
+    FSRS(std::vector<float> w, std::optional<float> requestRetention, std::optional<float> maximumInterval);
     ~FSRS();
 
-    std::tuple<Card, ReviewLog> reviewCard(Card card,
+    std::pair<Card, ReviewLog> reviewCard(Card card,
                                            const Rating rating,
-                                           const std::optional<std::tm>& now);
+                                           std::optional<std::tm>& now);
 
     std::unordered_map<Rating, SchedulingInfo> repeat(Card card,
-                                                      const std::optional<std::tm>& now);
+                                                      std::optional<std::tm> now);
 
-    void initDs(SchedulingCards s) const;
+    void initDs(SchedulingCards& s) const;
 
     void nextDs(SchedulingCards& s,
                  const float lastD,
@@ -48,7 +49,7 @@ public:
 
     float meanReversion(const float init, const float current);
 
-    float nextRecallStability(const float d, const float r, const Rating rating);
+    float nextRecallStability(const float d, const float s, const float r, const Rating rating);
 
     float nextForgetStability(const float d, const float s, const float r);
 
