@@ -6,7 +6,7 @@ static const std::string timeFmtStr="%Y-%m-%dT%H:%M:%S";
 * REVIEW LOG
 **/
 
-ReviewLog(Rating r, int sd, int ed, std::tm rev, State s)
+ReviewLog::ReviewLog(Rating r, int sd, int ed, std::tm rev, State s)
     : rating(r), scheduledDays(sd), elapsedDays(ed), review(rev), state(s) {}
 
 ReviewLog::~ReviewLog() {}
@@ -22,7 +22,7 @@ std::unordered_map<std::string, std::string> ReviewLog::toMap() const
     ret["elapsedDays"] = std::to_string(elapsedDays);
 
     std::ostringstream oss;
-    oss << std::put_time(&review, timeFmtStr);
+    oss << std::put_time(&review, timeFmtStr.c_str());
     ret["review"] = oss.str();
 
     ret["state"] = std::to_string(state);
@@ -30,19 +30,19 @@ std::unordered_map<std::string, std::string> ReviewLog::toMap() const
     return ret;
 }
 
-static ReviewLog ReviewLog::fromMap(const std::unordered_map<std::string, std::string>& map)
+ReviewLog ReviewLog::fromMap(const std::unordered_map<std::string, std::string>& map)
 {
-    Rating rating = std::static_cast<Rating>(std::stoi(map["rating"]));
+    Rating rating = static_cast<Rating>(std::stoi(map.at("rating")));
 
-    int scheduledDays = std::stoi(map["scheduledDays"]);
+    int scheduledDays = std::stoi(map.at("scheduledDays"));
 
-    int elapsedDays = std::stoi(map["elapsedDays"]);
+    int elapsedDays = std::stoi(map.at("elapsedDays"));
 
     std::tm review = {};
-    std::istringstream iss(map["review"]);
-    iss >> std::get_time(&review, timeFmtStr);
+    std::istringstream iss(map.at("review"));
+    iss >> std::get_time(&review, timeFmtStr.c_str());
     
-    State state = std::static_cast<State>(std::stoi(map["state"]));
+    State state = static_cast<State>(std::stoi(map.at("state")));
     
     return ReviewLog(rating, scheduledDays, elapsedDays, review, state);
 }
@@ -51,21 +51,21 @@ static ReviewLog ReviewLog::fromMap(const std::unordered_map<std::string, std::s
 * CARD
 **/
 
-Card::Card(std::tm d,
-           float st,
-           float d,
-           float ed,
-           float sd,
-           int r,
-           int l,
-           State s,
-           std::optional<std::tm> lr)
-    : due(d), stability(st), difficulty(d), elapsedDays(ed),
-      scheduledDays(sd), reps(r), lapses(l), state(s), last_review(lr)
+Card::Card()
+    : due(std::tm{}), stability(0), difficulty(0), elapsedDays(0), scheduledDays(0),
+      reps(0), lapses(0), state(State::New), lastReview(std::nullopt)
+{
+    std::time_t t = time(nullptr);
+    due = *localtime(&t);
+}
+
+Card::Card(std::tm due, float st, float d, int ed, int sd, int r, int l, State s, std::optional<std::tm> lr)
+    : due(due), stability(st), difficulty(d), elapsedDays(ed),
+      scheduledDays(sd), reps(r), lapses(l), state(s), lastReview(lr)
 {
     if (std::mktime(&due) == -1) {
         time_t now = time(0);
-        due = *gmtime(&now);
+        due = *localtime(&now);
     }
 }
 
@@ -76,7 +76,7 @@ std::unordered_map<std::string, std::string> Card::toMap() const
     std::unordered_map<std::string, std::string> ret;
 
     std::ostringstream oss;
-    oss << std::put_time(&due, timeFmtStr);
+    oss << std::put_time(&due, timeFmtStr.c_str());
     ret["due"] = oss.str();
 
     ret["stability"] = std::to_string(stability);
@@ -87,10 +87,10 @@ std::unordered_map<std::string, std::string> Card::toMap() const
     ret["lapses"] = std::to_string(lapses);
     ret["state"] = std::to_string(state);
     
-    if (last_review.has_value()) {
+    if (lastReview.has_value()) {
         oss.str("");
         oss.clear();
-        oss << std::put_time(&last_review.value(), timeFmtStr);
+        oss << std::put_time(&lastReview.value(), timeFmtStr.c_str());
         ret["lastReview"] = oss.str();
     } else {
         ret["lastReview"] = "N/A";
@@ -99,26 +99,25 @@ std::unordered_map<std::string, std::string> Card::toMap() const
     return ret;
 }
 
-static Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
+Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
 {
     std::tm due = {};
-    std::istringstream iss(map["due"]);
-    iss >> std::get_time(&due, timeFmtStr);
+    std::istringstream iss(map.at("due"));
+    iss >> std::get_time(&due, timeFmtStr.c_str());
 
-    stability = std::stof(map["stability"]);
-    difficulty = std::stof(map["difficulty"]);
-    elapsedDays = std::stoi(map["elapsedDays"]);
-    scheduledDays = std::stoi(map["scheduledDays"]);
-    reps = std::stoi(map["reps"]);
-    lapses = std::stoi(map["lapses"]);
-    state = std::static_cast<State>(std::stoi(map["state"]));
+    const float stability = std::stof(map.at("stability"));
+    const float difficulty = std::stof(map.at("difficulty"));
+    const int elapsedDays = std::stoi(map.at("elapsedDays"));
+    const int scheduledDays = std::stoi(map.at("scheduledDays"));
+    const int reps = std::stoi(map.at("reps"));
+    const int lapses = std::stoi(map.at("lapses"));
+    const State state = static_cast<State>(std::stoi(map.at("state")));
 
 
-    lastReview = std::nullopt;
-    if (map["review"] != "N/A") {
-        std::tm review = {};
-        std::istringstream iss(map["review"]);
-        iss >> std::get_time(&review.value(), timeFmtStr);
+    std::optional<std::tm> lastReview = std::nullopt;
+    if (map.at("review") != "N/A") {
+        std::istringstream iss(map.at("review"));
+        iss >> std::get_time(&lastReview.value(), timeFmtStr.c_str());
     }
 
     return Card(due, stability, difficulty, elapsedDays, scheduledDays, reps, lapses, state, lastReview);
@@ -131,10 +130,10 @@ std::optional<float> Card::getRetrievability(const std::tm& now) const
 
     if (state == State::Review) {
         time_t now_t = std::mktime(const_cast<std::tm*>(&now));
-        time_t last_review_t = std::mktime(const_cast<std::tm*>(&lastReview));
-        const seconds_diff = std::difftime(now_t, last_review_t);
-        const int days_diff = static_cast<int>(std::floor(seconds_diff / (60 * 60 * 24)));
-        return std::pow((1 + factor * elapsed_days / stability), decay);
+        time_t last_review_t = std::mktime(const_cast<std::tm*>(&lastReview.value()));
+        const int seconds_diff = std::difftime(now_t, last_review_t);
+        const int days_diff = static_cast<int>(std::floor(static_cast<float>(seconds_diff) / (60.0f * 60.0f * 24.0f)));
+        return std::pow((1 + factor * days_diff / stability), decay);
     }
 
     return std::nullopt;
@@ -149,9 +148,9 @@ SchedulingCards::SchedulingCards(Card card)
 
 SchedulingCards::~SchedulingCards() {}
 
-void SchedulingCards::updateState(const State& s)
+void SchedulingCards::updateState(const State& state)
 {
-    switch (s) {
+    switch (state) {
         case State::New:
             again.state = State::Learning;
             hard.state = State::Learning;
@@ -159,6 +158,7 @@ void SchedulingCards::updateState(const State& s)
             easy.state = State::Review;
             break;
         case State::Learning:
+        case State::Relearning:
             again.state = state;
             hard.state = state;
             good.state = State::Review;
@@ -171,10 +171,12 @@ void SchedulingCards::updateState(const State& s)
             easy.state = State::Review;
             again.lapses += 1;
             break;
+        default:
+            break;
     }
 }
 
-void SchedulingCards::schedule(const std::tm& now, int hI, int gI, int eI)
+void SchedulingCards::schedule(std::tm& now, int hI, int gI, int eI)
 {
     again.scheduledDays = 0;
     hard.scheduledDays = hI;
@@ -185,67 +187,67 @@ void SchedulingCards::schedule(const std::tm& now, int hI, int gI, int eI)
     std::time_t delta_t = 0;
 
     delta_t = now_t + 5 * 60;
-    again.due = *(std::gmtime(&delta_t));
+    again.due = *(std::localtime(&delta_t));
 
     if (hI > 0) {
         delta_t = now_t + hI * 60 * 60 * 24;
-        hard.due = *(std::gmtime(&delta_t));
+        hard.due = *(std::localtime(&delta_t));
     } else {
         delta_t = now_t + 10 * 60;
-        hard.due = *(std::gmtime(&delta_t));
+        hard.due = *(std::localtime(&delta_t));
     }
 
     delta_t = now_t + gI * 60 * 60 * 24;
-    good.due = *(std::gmtime(delta_t));
+    good.due = *(std::localtime(&delta_t));
 
     delta_t = now_t + eI * 60 * 60 * 24;
-    easy.due = *(std::gmtime(delta_t));
+    easy.due = *(std::localtime(&delta_t));
 }
 
 std::unordered_map<Rating, SchedulingInfo>
 SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 {
     return std::unordered_map<Rating, SchedulingInfo> {
-        Rating.Again : SchedulingInfo {
+        {Rating::Again, SchedulingInfo {
             .card = again,
             .reviewLog = ReviewLog(
-                Rating.Again,
+                Rating::Again,
                 again.scheduledDays,
                 card.elapsedDays,
                 now,
                 card.state
             ),
-        },
-        Rating.Hard : SchedulingInfo {
+        }},
+        {Rating::Hard, SchedulingInfo {
             .card = hard,
             .reviewLog = ReviewLog(
-                Rating.Hard,
+                Rating::Hard,
                 again.scheduledDays,
                 card.elapsedDays,
                 now,
                 card.state
             ),
-        },
-        Rating.Good : SchedulingInfo {
+        }},
+        {Rating::Good, SchedulingInfo {
             .card = good,
             .reviewLog = ReviewLog(
-                Rating.Good,
+                Rating::Good,
                 again.scheduledDays,
                 card.elapsedDays,
                 now,
                 card.state
             ),
-        },
-        Rating.Easy : SchedulingInfo {
+        }},
+        {Rating::Easy, SchedulingInfo {
             .card = easy,
             .reviewLog = ReviewLog(
-                Rating.Easy,
+                Rating::Easy,
                 again.scheduledDays,
                 card.elapsedDays,
                 now,
                 card.state
             ),
-        },
+        }},
     };
 }
 
@@ -253,9 +255,9 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 * Parameters
 **/
 
-Parameters::Parameters(std::optional<std::vector<float>> w, std::optional<float> rr, std::optional<int> mi)
+Parameters::Parameters(std::optional<std::vector<float>> weights, std::optional<float> rr, std::optional<int> mi)
 {
-    this->w = w.value_or(
+    w = weights.value_or(
         std::vector<float> {
             0.4072,
             1.1829,
@@ -279,9 +281,9 @@ Parameters::Parameters(std::optional<std::vector<float>> w, std::optional<float>
         }
     );
 
-    this.requestRetention = rr.value_or(0.9f);
+    requestRetention = rr.value_or(0.9f);
 
-    this.maximumInterval = mi.value_or(36500);
+    maximumInterval = mi.value_or(36500);
 }
 
 Parameters::~Parameters() {}

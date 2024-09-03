@@ -7,12 +7,14 @@
 #include <optional>
 #include <ctime>
 #include <sstream>
+#include <iomanip>
 
 enum State {
     New = 0,
     Learning,
     Review,
     Relearning,
+    NumState
 };
 
 enum Rating {
@@ -20,6 +22,7 @@ enum Rating {
     Hard,
     Good,
     Easy,
+    NumRating
 };
 
 class ReviewLog {
@@ -30,6 +33,7 @@ public:
     std::tm review;
     State state;
 
+    ReviewLog() = default;
     ReviewLog(Rating rating,
               int scheduledDays,
               int elapsedDays,
@@ -42,6 +46,7 @@ public:
 
 class Card {
 public:
+    std::tm due;
     float stability;
     float difficulty;
     int elapsedDays;
@@ -49,18 +54,10 @@ public:
     int reps;
     int lapses;
     State state;
-    std::tm due;
     std::optional<std::tm> lastReview;
 
-    Card(std::tm due,
-         float stability,
-         float difficulty,
-         int elapsedDays,
-         int scheduledDays,
-         int reps,
-         int lapses,
-         State state,
-         std::optional<std::tm> last_review);
+    Card();
+    Card(std::tm due, float stability, float difficulty, int elapsedDays, int scheduledDays, int reps, int lapses, State state, std::optional<std::tm> last_review);
     ~Card();
     std::unordered_map<std::string, std::string> toMap() const;
     static Card fromMap(const std::unordered_map<std::string, std::string>& map);
@@ -82,7 +79,7 @@ public:
     SchedulingCards(Card card);
     ~SchedulingCards();
     void updateState(const State& state);
-    void schedule(const std::tm& now, int hardInterval, int goodInterval, int easyInterval);
+    void schedule(std::tm& now, int hardInterval, int goodInterval, int easyInterval);
     std::unordered_map<Rating, SchedulingInfo> recordLog(const Card& card, const std::tm& now) const;
 };
 
