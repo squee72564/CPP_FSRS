@@ -8,6 +8,7 @@
 #include <ctime>
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 enum State {
     New = 0,
