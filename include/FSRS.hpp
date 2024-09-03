@@ -17,15 +17,17 @@ public:
     float decay;
     float factor;
 
-    FSRS(std::vector<float> w, std::optional<float> requestRetention, std::optional<float> maximumInterval);
+    FSRS(std::optional<std::vector<float>> w = std::nullopt,
+	 std::optional<float> requestRetention = std::nullopt,
+	 std::optional<float> maximumInterval = std::nullopt);
     ~FSRS();
 
     std::pair<Card, ReviewLog> reviewCard(Card card,
                                            const Rating rating,
-                                           std::optional<std::tm>& now);
+                                           std::optional<std::tm>& now = std::nullopt);
 
     std::unordered_map<Rating, SchedulingInfo> repeat(Card card,
-                                                      std::optional<std::tm> now);
+                                                      std::optional<std::tm> now = std::nullopt);
 
     void initDs(SchedulingCards& s) const;
 

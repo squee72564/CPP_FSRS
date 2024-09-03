@@ -58,7 +58,15 @@ public:
     std::optional<std::tm> lastReview;
 
     Card();
-    Card(std::tm due, float stability, float difficulty, int elapsedDays, int scheduledDays, int reps, int lapses, State state, std::optional<std::tm> last_review);
+    Card(std::tm due,
+	 float stability,
+	 float difficulty,
+	 int elapsedDays,
+	 int scheduledDays,
+	 int reps,
+	 int lapses,
+	 State state,
+	 std::optional<std::tm> last_review = std::nullopt);
     ~Card();
     std::unordered_map<std::string, std::string> toMap() const;
     static Card fromMap(const std::unordered_map<std::string, std::string>& map);
@@ -90,7 +98,9 @@ public:
     int maximumInterval;
     std::vector<float> w;
 
-    Parameters(std::optional<std::vector<float>> w, std::optional<float> requestRetention, std::optional<int> maximumInterval);
+    Parameters(std::optional<std::vector<float>> w = std::nullopt,
+	       std::optional<float> requestRetention = std::nullopt,
+	       std::optional<int> maximumInterval = std::nullopt);
     ~Parameters();
 };
 
