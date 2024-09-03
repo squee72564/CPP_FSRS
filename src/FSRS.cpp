@@ -148,12 +148,12 @@ float FSRS::forgettingCurve(const int elapsedDays, const float stability) const
 
 int FSRS::nextInterval(const float s)
 {
-    float new_interval =
+    const float new_interval =
         s
         / factor
         * (std::powf(p.requestRetention, 1.0f / decay)-1);
 
-        const int mx = std::max(round(new_interval), 1.0f);
+        const int mx = std::max(static_cast<int>(round(new_interval)), 1);
         return std::min(mx, p.maximumInterval);
 }
 
