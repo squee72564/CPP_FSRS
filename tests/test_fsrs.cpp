@@ -284,8 +284,16 @@ void test_card_serialize()
     std::string json2 = unorderedMapToJson(card2_map);
 
     assert(json1 == json2);
+    
+    std::unordered_map<std::string, std::string> map_check_1 = jsonToUnorderedMap(json1);
+    std::unordered_map<std::string, std::string> map_check_2 = jsonToUnorderedMap(json2);
+
+    assert(map_check_1 == card_map);
+    assert(map_check_2 == card2_map);
 
     std::cout << json1 << "\n" << json2 << "\n";
+
+
 
     std::cout << std::endl;
 }
@@ -321,6 +329,12 @@ void test_reviewlog_serialize()
     std::string json2 = unorderedMapToJson(review_log_map2);
 
     assert(json1 == json2);
+
+    std::unordered_map<std::string, std::string> map_check_1 = jsonToUnorderedMap(json1);
+    std::unordered_map<std::string, std::string> map_check_2 = jsonToUnorderedMap(json2);
+
+    assert(map_check_1 == review_log_map);
+    assert(map_check_2 == review_log_map2);
 
     std::cout << json1 << "\n" << json2 << "\n";
 
