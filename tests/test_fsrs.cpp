@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "FSRS.hpp"
+#include "json.hpp"
 
 void test_repeat_default_arg();
 void test_memo_state();
@@ -274,17 +275,17 @@ void test_card_serialize()
     std::unordered_map<std::string, std::string> card2_map = card2.toMap();
 
     for (const auto& [key, val] : card_map) {
-        if (card2_map.find(key) == card2_map.end())
-            continue;	
+        assert(card2_map.find(key) != card2_map.end());
 
         assert(card2_map[key] == val);
-
-        std::cout
-            << "Card 1 [" << key << "] : "
-            << val 
-            << "\tCard2 [" << key << "] : "
-            << card2_map[key] << "\n";
     }
+
+    std::string json1 = unorderedMapToJson(card_map);
+    std::string json2 = unorderedMapToJson(card2_map);
+
+    assert(json1 == json2);
+
+    std::cout << json1 << "\n" << json2 << "\n";
 
     std::cout << std::endl;
 }
@@ -311,23 +312,26 @@ void test_reviewlog_serialize()
     std::unordered_map<std::string, std::string> review_log_map2 = review_log2.toMap();
 
     for (const auto& [key, val] : review_log_map) {
-        if (review_log_map2.find(key) == review_log_map2.end())
-            continue;	
+        assert(review_log_map2.find(key) != review_log_map2.end());
 
         assert(review_log_map2[key] == val);
-
-        std::cout
-            << "Review Log 1 [" << key << "] : "
-            << val 
-            << "\tReview Log 2 [" << key << "] : "
-            << review_log_map2[key] << "\n";
     }
+
+    std::string json1 = unorderedMapToJson(review_log_map);
+    std::string json2 = unorderedMapToJson(review_log_map2);
+
+    assert(json1 == json2);
+
+    std::cout << json1 << "\n" << json2 << "\n";
+
 
     std::cout << std::endl;
 }
 
 void test_custom_scheduler_args()
 {
+    std::cout << "--function: test_custom_scheduler_args()\n\n";
+
     FSRS f = FSRS(
 	std::vector<float> {
 	    0.4197f,
@@ -416,7 +420,7 @@ void test_custom_scheduler_args()
 
     assert(ivl_history == test_ivl_history);
 
-    // Initialize another scheduler and verify params are properly sey
+    // Initialize another scheduler and verify params are properly set
     std::optional<std::vector<float>> w = std::vector<float> {
 	0.1456f,
 	0.4186f,
