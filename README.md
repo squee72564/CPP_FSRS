@@ -1,3 +1,6 @@
+![Build and test](https://github.com/squee72564/CPP_SRS/blob/main/.github/workflows/c-cpp.yml/badge.svg)
+
+
 # CPP-FSRS
 
 This is an implementation of the FSRS scheduler algorithm in C++.
