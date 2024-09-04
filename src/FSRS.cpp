@@ -14,7 +14,7 @@ FSRS::~FSRS()
 
 }
 
-std::pair<Card, ReviewLog> FSRS::reviewCard(Card card, const Rating rating, std::optional<std::tm>& now)
+std::pair<Card, ReviewLog> FSRS::reviewCard(Card card, const Rating rating, std::optional<std::tm> now)
 {
     std::unordered_map<Rating, SchedulingInfo> schedulingCards = repeat(card, now);
 

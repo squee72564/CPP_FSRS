@@ -24,7 +24,7 @@ public:
 
     std::pair<Card, ReviewLog> reviewCard(Card card,
                                            const Rating rating,
-                                           std::optional<std::tm>& now = std::nullopt);
+                                           std::optional<std::tm> now = std::nullopt);
 
     std::unordered_map<Rating, SchedulingInfo> repeat(Card card,
                                                       std::optional<std::tm> now = std::nullopt);
