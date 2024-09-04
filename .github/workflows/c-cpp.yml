@@ -19,7 +19,7 @@ jobs:
       run: make
     
     - name: Run tests
-      run: ./space_repitition_algo
+      run: ./tests/space_repitition_test
     
     - name: Clean up
       run: make clean

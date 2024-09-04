@@ -1,18 +1,18 @@
 CXX = g++
-CXXFLAGS = -O3 -Wall -std=c++17
+CXXFLAGS = -O3 -Wall -Werror -Wpedantic -std=c++17
 CXXSRC = ./src/models.cpp ./src/FSRS.cpp ./tests/test_fsrs.cpp
 CXXINCLUDE = ./include
 
-TARGET=space_repitition_algo
+TESTTARGET=./tests/space_repitition_test
 OBJS=$(CXXSRC:.cpp=.o)
 
-all: clean ${TARGET}
+all: clean ${TESTTARGET}
 
-$(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS) -I$(CXXINCLUDE)
+$(TESTTARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $(TESTTARGET) $(OBJS) -I$(CXXINCLUDE)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -I$(CXXINCLUDE) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(TESTTARGET) $(OBJS)
