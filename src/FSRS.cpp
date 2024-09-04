@@ -139,12 +139,12 @@ float FSRS::initStability(const Rating r) const
 
 float FSRS::initDifficulty(const Rating r) const
 {
-    return std::min(std::max(p.w[4] - std::expf(p.w[5] * (r-1)) + 1.0f, 1.0f), 10.0f);
+    return std::min(std::max(p.w[4] - std::exp(p.w[5] * (r-1)) + 1.0f, 1.0f), 10.0f);
 }
 
 float FSRS::forgettingCurve(const int elapsedDays, const float stability) const
 {
-    return std::powf((1 + factor * elapsedDays / stability), decay);
+    return std::pow((1 + factor * elapsedDays / stability), decay);
 }
 
 int FSRS::nextInterval(const float s)
@@ -152,7 +152,7 @@ int FSRS::nextInterval(const float s)
     const float new_interval =
         s
         / factor
-        * (std::powf(p.requestRetention, 1.0f / decay)-1);
+        * (std::pow(p.requestRetention, 1.0f / decay)-1);
 
         const int mx = std::max(static_cast<int>(round(new_interval)), 1);
         return std::min(mx, p.maximumInterval);
@@ -167,7 +167,7 @@ float FSRS::nextDifficulty(const float d, const Rating r)
 
 float FSRS::shortTermStability(const float stability, const Rating rating)
 {
-    return stability * std::expf(p.w[17] * (rating - 3 + p.w[18]));
+    return stability * std::exp(p.w[17] * (rating - 3 + p.w[18]));
 }
 
 float FSRS::meanReversion(const float init, const float current)
@@ -182,10 +182,10 @@ float FSRS::nextRecallStability(const float d, const float s,  const float r, co
 
     return s * (
           1
-        + std::expf(p.w[8])
+        + std::exp(p.w[8])
         * (11-d)
-        * std::powf(s, -p.w[9])
-        * (std::expf((1-r) * p.w[10]) -1)
+        * std::pow(s, -p.w[9])
+        * (std::exp((1-r) * p.w[10]) -1)
         * hard_penalty
         * easy_bonus
     );
@@ -195,8 +195,8 @@ float FSRS::nextForgetStability(const float d, const float s, const float r)
 {
     return (
          p.w[11]
-         * std::powf(d, -p.w[12])
-         * (std::powf(s + 1, p.w[13]) - 1)
-         * std::expf((1 - r) * p.w[14])
+         * std::pow(d, -p.w[12])
+         * (std::pow(s + 1, p.w[13]) - 1)
+         * std::exp((1 - r) * p.w[14])
     );
 }

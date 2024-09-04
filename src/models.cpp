@@ -126,14 +126,14 @@ Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
 std::optional<float> Card::getRetrievability(const std::tm& now) const
 {
     const float decay = -0.5f;
-    const float factor = std::powf(0.9f, 1.0f/decay) - 1.0f;
+    const float factor = std::pow(0.9f, 1.0f/decay) - 1.0f;
 
     if (state == State::Review) {
         time_t now_t = internal_timegm(&now);
         time_t last_review_t = internal_timegm(&lastReview.value());
         const int seconds_diff = std::difftime(now_t, last_review_t);
         const int days_diff = static_cast<int>(std::floor(static_cast<float>(seconds_diff) / (60.0f * 60.0f * 24.0f)));
-        return std::powf((1 + factor * days_diff / stability), decay);
+        return std::pow((1 + factor * days_diff / stability), decay);
     }
 
     return std::nullopt;
