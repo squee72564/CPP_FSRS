@@ -82,8 +82,9 @@ void test_repeat_default_arg()
         }
 
         time_t now = std::time(nullptr);
-        time_t due = std::mktime(&card.due);
-        double diff = std::difftime(due, now);
+	std::tm now_gmtime = *std::gmtime(&now);
+        time_t due = internal_timegm(&card.due);
+        double diff = std::difftime(due, internal_timegm(&now_gmtime));
         
         std::cout << "Time delta (s): " << diff << "\n" << std::endl;
     }
@@ -99,7 +100,7 @@ void test_memo_state()
     Card card = Card();
 
     time_t time = std::time(nullptr);
-    std::tm tm = *localtime(&time);
+    std::tm tm = *std::gmtime(&time);
     std::optional<std::tm> now = tm;
 
     std::unordered_map<Rating, SchedulingInfo> scheduling_cards =  f.repeat(card, now);
@@ -120,9 +121,9 @@ void test_memo_state()
     for (std::size_t i = 0; i < ratings.size(); ++i) {
 	card = scheduling_cards[ratings[i]].card;
 
-	time_t now_t = std::mktime(&now.value());
+	time_t now_t = internal_timegm(&now.value());
 	now_t += ivl_history[i] * 60 * 60 * 24;
-	now = *localtime(&now_t);
+	now = *std::gmtime(&now_t);
 
 	scheduling_cards = f.repeat(card, now);
     }
@@ -151,7 +152,7 @@ void test_review_card() {
     FSRS f = FSRS(test_w, std::nullopt, std::nullopt);
     Card card = Card();
     time_t time = std::time(nullptr);
-    std::tm tm = *localtime(&time);
+    std::tm tm = *std::gmtime(&time);
 
     std::optional<std::tm> now = tm;
     
@@ -223,14 +224,16 @@ void test_datetime()
 
     Card card = Card();
 
-    time_t card_due_t = std::mktime(&card.due);
+    time_t card_due_t = internal_timegm(&card.due);
+    time_t now_t = std::time(nullptr);
+    std::tm now_gmtime = *std::gmtime(&now_t);
 
     // New cards should be due immediately after creation
-    assert(time(nullptr) >= card_due_t);
+    assert(internal_timegm(&now_gmtime) >= card_due_t);
 
     // Repeat a card with rating good before next tests 
     time_t time = std::time(nullptr);
-    std::tm tm = *localtime(&time);
+    std::tm tm = *std::gmtime(&time);
     std::optional<std::tm> now = tm;
 
     std::unordered_map<Rating, SchedulingInfo> scheduling_cards = f.repeat(card, now);
@@ -238,8 +241,8 @@ void test_datetime()
     
     assert(card.lastReview.has_value());
 
-    card_due_t = std::mktime(&card.due);
-    time_t card_last_review_t = std::mktime(&card.lastReview.value());
+    card_due_t = internal_timegm(&card.due);
+    time_t card_last_review_t = internal_timegm(&card.lastReview.value());
 
     std::cout
 	<< "Card due: "
@@ -354,7 +357,7 @@ void test_custom_scheduler_args()
     Card card = Card();
 
     time_t time = std::time(nullptr);
-    std::tm tm = *localtime(&time);
+    std::tm tm = *std::gmtime(&time);
     std::optional<std::tm> now = tm;
 
     std::vector<Rating> ratings = {
@@ -397,8 +400,8 @@ void test_custom_scheduler_args()
 	auto [card2, _] = f.reviewCard(card, rating, now);
 	card = card2;
 	ivl_history.push_back(card.scheduledDays);
-	time_t now_t = std::mktime(&card.due);
-	now = *std::localtime(&now_t);
+	time_t now_t = internal_timegm(&card.due);
+	now = *std::gmtime(&now_t);
     }
 
     for (std::size_t i = 0; i < ivl_history.size(); ++i) {
