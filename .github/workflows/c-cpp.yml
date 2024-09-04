@@ -1,0 +1,25 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+    - uses: actions/checkout@v4
+    
+    - name: Build with Makefile
+      run: make
+    
+    - name: Run tests
+      run: ./space_repitition_algo
+    
+    - name: Clean up
+      run: make clean
