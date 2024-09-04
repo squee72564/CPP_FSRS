@@ -29,17 +29,17 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
 {
     if (!now.has_value()) {
 	time_t now_t = std::time(nullptr);
-        std::tm tm = *std::localtime(&now_t);
+        std::tm tm = *std::gmtime(&now_t);
         now = tm;
     }
 
-    std::time_t now_t = std::mktime(&now.value());
+    std::time_t now_t = internal_timegm(&now.value());
     std::time_t delta_t = 0;
 
     if (card.state == State::New) {
         card.elapsedDays = 0;
     } else {
-        std::time_t last_review_t = std::mktime(&card.lastReview.value());
+        std::time_t last_review_t = internal_timegm(&card.lastReview.value());
         card.elapsedDays = std::difftime(now_t, last_review_t) / (60.0f * 60.0f * 24.0f);
     }
 
@@ -53,19 +53,19 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
         initDs(s);
 
         delta_t = now_t + 1 * 60;
-        s.again.due = *std::localtime(&delta_t);
+        s.again.due = *std::gmtime(&delta_t);
 
         delta_t = now_t + 5 * 60;
-        s.hard.due = *std::localtime(&delta_t);
+        s.hard.due = *std::gmtime(&delta_t);
 
         delta_t = now_t + 10 * 60;
-        s.good.due = *std::localtime(&delta_t);
+        s.good.due = *std::gmtime(&delta_t);
 
         const int easy_interval = nextInterval(s.easy.stability);
         s.easy.scheduledDays = easy_interval;
 
         delta_t = now_t + easy_interval * 60 * 60 * 24;
-        s.easy.due = *std::localtime(&delta_t);
+        s.easy.due = *std::gmtime(&delta_t);
 
     } else if (card.state == State::Learning || card.state == State::Relearning) {
         const int interval = card.elapsedDays;
