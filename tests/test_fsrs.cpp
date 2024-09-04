@@ -58,7 +58,7 @@ void test_repeat_default_arg()
 
     Card card = Card();
 
-    std::unordered_map<Rating, SchedulingInfo> scheduling_cards = f.repeat(card, std::nullopt);
+    std::unordered_map<Rating, SchedulingInfo> scheduling_cards = f.repeat(card);
 
     for (int r = Rating::Again; r != Rating::NumRating; r++) {
         
