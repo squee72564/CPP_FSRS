@@ -208,46 +208,58 @@ std::unordered_map<Rating, SchedulingInfo>
 SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 {
     return std::unordered_map<Rating, SchedulingInfo> {
-        {Rating::Again, SchedulingInfo {
-            .card = again,
-            .reviewLog = ReviewLog(
-                Rating::Again,
-                again.scheduledDays,
-                card.elapsedDays,
-                now,
-                card.state
-            ),
-        }},
-        {Rating::Hard, SchedulingInfo {
-            .card = hard,
-            .reviewLog = ReviewLog(
-                Rating::Hard,
-                again.scheduledDays,
-                card.elapsedDays,
-                now,
-                card.state
-            ),
-        }},
-        {Rating::Good, SchedulingInfo {
-            .card = good,
-            .reviewLog = ReviewLog(
-                Rating::Good,
-                again.scheduledDays,
-                card.elapsedDays,
-                now,
-                card.state
-            ),
-        }},
-        {Rating::Easy, SchedulingInfo {
-            .card = easy,
-            .reviewLog = ReviewLog(
-                Rating::Easy,
-                again.scheduledDays,
-                card.elapsedDays,
-                now,
-                card.state
-            ),
-        }},
+        {
+	    Rating::Again,
+	    SchedulingInfo {
+		.card = again,
+		.reviewLog = ReviewLog(
+		    Rating::Again,
+		    again.scheduledDays,
+		    card.elapsedDays,
+		    now,
+		    card.state
+		),
+	    }
+	},
+        {
+	    Rating::Hard,
+	    SchedulingInfo {
+		.card = hard,
+		.reviewLog = ReviewLog(
+		    Rating::Hard,
+		    again.scheduledDays,
+		    card.elapsedDays,
+		    now,
+		    card.state
+		),
+	    }
+	},
+        {
+	    Rating::Good,
+	    SchedulingInfo {
+		.card = good,
+		.reviewLog = ReviewLog(
+		    Rating::Good,
+		    again.scheduledDays,
+		    card.elapsedDays,
+		    now,
+		    card.state
+		),
+	    }
+	},
+        {
+	    Rating::Easy,
+	    SchedulingInfo {
+		.card = easy,
+		.reviewLog = ReviewLog(
+		    Rating::Easy,
+		    again.scheduledDays,
+		    card.elapsedDays,
+		    now,
+		    card.state
+		),
+	    }
+	},
     };
 }
 
