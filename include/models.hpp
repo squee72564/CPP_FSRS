@@ -10,6 +10,8 @@
 #include <iomanip>
 #include <cmath>
 
+#include "gmtime.hpp"
+
 enum State {
     New = 0,
     Learning,
