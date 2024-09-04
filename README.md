@@ -32,10 +32,10 @@ Choose a rating and review the card:
 ```cpp
 // you can choose one of the four possible ratings
 /*
- * Rating.Again # forget; incorrect response
- * Rating.Hard # recall; correct response recalled with serious difficulty
- * Rating.Good # recall; correct response after a hesitation
- * Rating.Easy # recall; perfect response
+ * Rating::Again # forget; incorrect response
+ * Rating::Hard # recall; correct response recalled with serious difficulty
+ * Rating::Good # recall; correct response after a hesitation
+ * Rating::Easy # recall; perfect response
 */
 
 Rating rating = Rating::Good;
