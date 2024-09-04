@@ -211,8 +211,8 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
         {
 	    Rating::Again,
 	    SchedulingInfo {
-		.card = again,
-		.reviewLog = ReviewLog(
+		again,
+		ReviewLog(
 		    Rating::Again,
 		    again.scheduledDays,
 		    card.elapsedDays,
@@ -224,8 +224,8 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
         {
 	    Rating::Hard,
 	    SchedulingInfo {
-		.card = hard,
-		.reviewLog = ReviewLog(
+		hard,
+		ReviewLog(
 		    Rating::Hard,
 		    again.scheduledDays,
 		    card.elapsedDays,
@@ -237,8 +237,8 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
         {
 	    Rating::Good,
 	    SchedulingInfo {
-		.card = good,
-		.reviewLog = ReviewLog(
+		good,
+		ReviewLog(
 		    Rating::Good,
 		    again.scheduledDays,
 		    card.elapsedDays,
@@ -250,8 +250,8 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
         {
 	    Rating::Easy,
 	    SchedulingInfo {
-		.card = easy,
-		.reviewLog = ReviewLog(
+		easy,
+		ReviewLog(
 		    Rating::Easy,
 		    again.scheduledDays,
 		    card.elapsedDays,
