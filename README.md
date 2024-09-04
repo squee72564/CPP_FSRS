@@ -1,5 +1,9 @@
 # CPP-FSRS
 
+This is an implementation of the FSRS scheduler algorithm in C++.
+
+Learn more about the FSRS algorithm from the [Open Spaced Repition](https://github.com/open-spaced-repetition) group.
+
 ## Installation
 You can clone the repo and use the Makefile to build the tests
 ```
@@ -96,7 +100,7 @@ Aside from using the convenience method `reviewCard`, there is also the `repeat`
 #include <ctime>
 #include <optional>
 
-// custom review time (will be considered UTC)
+// custom review time (will be considered GMT)
 std::tm t = {};
 t.tm_sec = 56;
 t.tm_min = 7;
@@ -136,13 +140,21 @@ ReviewLog review_log = scheduling_cards[rating].review_log;
 Once `Card` and `ReviewLog` objects are in this form you can easily JSON-serializable them via the `unorederedMapToJson` method for easy database storage:
 
 ```cpp
-// serialize before storage
+// convert to a unordered_map 
 std::unordered_map<std::string ,std::string> card_map = card.toMap();
 std::unordered_map<std::string ,std::string> review_log_map = review_log.toMap();
 
-// deserialize from dict
+// convert back to Card/ReviewLog
 Card new_card = Card::fromMap(card_map);
-Card new_review_log = ReviewLog::fromMap(review_log_map);
+ReviewLog new_review_log = ReviewLog::fromMap(review_log_map);
+
+// Serialize to JSON from map before storage
+std::string json1 = unorderedMapToJson(card_map);
+std::string json2 = unorderedMapToJson(review_log_map);
+
+// Deserialize from JSON to map
+std::unordered_map<std::string, std::string> new_card_map = jsonToUnorderedMap(json1);
+std::unordered_map<std::string, std::string> new_review_log_map = jsonToUnorderedMap(json2);
 ```
 
 ## Reference
