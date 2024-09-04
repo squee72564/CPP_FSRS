@@ -1,4 +1,4 @@
-[![Build and test](https://github.com/squee72564/CPP_SRS/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/squee72564/CPP_SRS/actions/workflows/c-cpp.yml)
+[![Build and test](https://github.com/squee72564/CPP_FSRS/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/squee72564/CPP_FSRS/actions/workflows/c-cpp.yml)
 
 
 # CPP-FSRS
