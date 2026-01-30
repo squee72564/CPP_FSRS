@@ -8,11 +8,20 @@ This is an implementation of the FSRS scheduler algorithm in C++.
 Learn more about the FSRS algorithm from the [Open Spaced Repition](https://github.com/open-spaced-repetition) group.
 
 ## Installation
-You can clone the repo and use the Makefile to build the tests
+This project uses CMake. Dependencies (`nlohmann-json`, `gtest`) are managed via vcpkg manifest mode.
+
 ```
-git clone https://github.com/squee72564/CPP_SRS.git
-cd CPP_SRS
-make
+git clone https://github.com/squee72564/CPP_FSRS.git
+cd CPP_FSRS
+cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+cmake --build build
+ctest --test-dir build --output-on-failure
+```
+
+To build without tests:
+```
+cmake -S . -B build -DBUILD_TESTS=OFF -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake
+cmake --build build
 ```
 
 ## Quickstart
@@ -43,7 +52,7 @@ Choose a rating and review the card:
 
 Rating rating = Rating::Good;
 
-auto [card, review_log] = f.review_card(card, rating)
+auto [card, review_log] = f.reviewCard(card, rating);
 ```
 
 See when the card is due next
@@ -56,7 +65,7 @@ std::tm now = *std::gmtime(&now_t); // Convert to GMT
 
 // how much time between when the card is due and now
 // internal_timegm is used to transform the std::tm that was set with std::gmtime into time_t
-int time_delta = std::difftime(internal_timegm(&due) - internal_timegm(&now));
+int time_delta = std::difftime(internal_timegm(&due), internal_timegm(&now));
 ```
 
 ## Usage
@@ -108,7 +117,7 @@ std::tm t = {};
 t.tm_sec = 56;
 t.tm_min = 7;
 t.tm_hour = 20;
-t.tm_,day = 13;
+t.tm_mday = 13;
 t.tm_mon = 7;
 t.tm_year = 2024 - 1900; // years since 1900
 
@@ -124,17 +133,17 @@ Card card_Good = scheduling_cards[Rating::Good].card;
 Card card_Easy = scheduling_cards[Rating::Easy].card;
 
 // get next review interval for each rating
-int scheduled_days_Again = card_Again.scheduled_days;
-int scheduled_days_Hard = card_Hard.scheduled_days;
-int scheduled_days_Good = card_Good.scheduled_days;
-int scheduled_days_Easy = card_Easy.scheduled_days;
+int scheduled_days_Again = card_Again.scheduledDays;
+int scheduled_days_Hard = card_Hard.scheduledDays;
+int scheduled_days_Good = card_Good.scheduledDays;
+int scheduled_days_Easy = card_Easy.scheduledDays;
 
 // choose a rating and update the card
 Rating rating = Rating::Good;
 Card card = scheduling_cards[rating].card;
 
 // get the corresponding review log for the review
-ReviewLog review_log = scheduling_cards[rating].review_log;
+ReviewLog review_log = scheduling_cards[rating].reviewLog;
 ```
 
 ### Serialization
