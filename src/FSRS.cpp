@@ -41,6 +41,9 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
     } else {
         std::time_t last_review_t = internal_timegm(&card.lastReview.value());
         card.elapsedDays = std::difftime(now_t, last_review_t) / (60.0f * 60.0f * 24.0f);
+        if (card.elapsedDays < 0) {
+            card.elapsedDays = 0;
+        }
     }
 
     card.lastReview = now;
@@ -74,9 +77,15 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
         const float retrieveability = forgettingCurve(interval, last_s);
         nextDs(s, last_d, last_s, retrieveability, card.state);
 
-        const int hard_interval = 0;
-        const int good_interval = nextInterval(s.good.stability);
-        const int easy_interval = std::max(nextInterval(s.easy.stability), good_interval + 1);
+        int hard_interval = 0;
+        int good_interval = nextInterval(s.good.stability);
+        int easy_interval = std::max(nextInterval(s.easy.stability), good_interval + 1);
+
+        good_interval = std::min(good_interval, p.maximumInterval);
+        easy_interval = std::min(easy_interval, p.maximumInterval);
+        good_interval = std::max(good_interval, hard_interval);
+        easy_interval = std::max(easy_interval, good_interval);
+
         s.schedule(now.value(), hard_interval, good_interval, easy_interval);
     } else {
         const int interval = card.elapsedDays;
@@ -87,9 +96,18 @@ std::unordered_map<Rating, SchedulingInfo> FSRS::repeat(Card card,
 
         int hard_interval = nextInterval(s.hard.stability);
         int good_interval = nextInterval(s.good.stability);
+        int easy_interval = nextInterval(s.easy.stability);
+
         hard_interval = std::min(hard_interval, good_interval);
         good_interval = std::max(good_interval, hard_interval + 1);
-        int easy_interval = std::max(nextInterval(s.easy.stability), good_interval + 1);
+        easy_interval = std::max(easy_interval, good_interval + 1);
+
+        hard_interval = std::min(hard_interval, p.maximumInterval);
+        good_interval = std::min(good_interval, p.maximumInterval);
+        easy_interval = std::min(easy_interval, p.maximumInterval);
+        good_interval = std::max(good_interval, hard_interval);
+        easy_interval = std::max(easy_interval, good_interval);
+
         s.schedule(now.value(), hard_interval, good_interval, easy_interval);
     }
 

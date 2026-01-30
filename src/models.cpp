@@ -1,5 +1,7 @@
 #include "models.hpp"
 
+#include <stdexcept>
+
 static const std::string timeFmtStr="%Y-%m-%dT%H:%M:%S";
 
 /**
@@ -41,6 +43,9 @@ ReviewLog ReviewLog::fromMap(const std::unordered_map<std::string, std::string>&
     std::tm review = {};
     std::istringstream iss(map.at("review"));
     iss >> std::get_time(&review, timeFmtStr.c_str());
+    if (iss.fail()) {
+        throw std::invalid_argument("Invalid review datetime");
+    }
     
     State state = static_cast<State>(std::stoi(map.at("state")));
     
@@ -102,6 +107,9 @@ Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
     std::tm due = {};
     std::istringstream iss(map.at("due"));
     iss >> std::get_time(&due, timeFmtStr.c_str());
+    if (iss.fail()) {
+        throw std::invalid_argument("Invalid due datetime");
+    }
 
     const float stability = std::stof(map.at("stability"));
     const float difficulty = std::stof(map.at("difficulty"));
@@ -117,6 +125,9 @@ Card Card::fromMap(const std::unordered_map<std::string, std::string>& map)
         std::istringstream iss(map.at("lastReview"));
 	std:: tm time;
         iss >> std::get_time(&time, timeFmtStr.c_str());
+        if (iss.fail()) {
+            throw std::invalid_argument("Invalid lastReview datetime");
+        }
 	lastReview = time;
     }
 
@@ -129,6 +140,9 @@ std::optional<float> Card::getRetrievability(const std::tm& now) const
     const float factor = std::pow(0.9f, 1.0f/decay) - 1.0f;
 
     if (state == State::Review) {
+        if (!lastReview.has_value() || stability <= 0.0f) {
+            return std::nullopt;
+        }
         time_t now_t = internal_timegm(&now);
         time_t last_review_t = internal_timegm(&lastReview.value());
         const int seconds_diff = std::difftime(now_t, last_review_t);
@@ -227,7 +241,7 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 		hard,
 		ReviewLog(
 		    Rating::Hard,
-		    again.scheduledDays,
+		    hard.scheduledDays,
 		    card.elapsedDays,
 		    now,
 		    card.state
@@ -240,7 +254,7 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 		good,
 		ReviewLog(
 		    Rating::Good,
-		    again.scheduledDays,
+		    good.scheduledDays,
 		    card.elapsedDays,
 		    now,
 		    card.state
@@ -253,7 +267,7 @@ SchedulingCards::recordLog(const Card& card, const std::tm& now) const
 		easy,
 		ReviewLog(
 		    Rating::Easy,
-		    again.scheduledDays,
+		    easy.scheduledDays,
 		    card.elapsedDays,
 		    now,
 		    card.state
@@ -299,4 +313,3 @@ Parameters::Parameters(std::optional<std::vector<float>> weights, std::optional<
 }
 
 Parameters::~Parameters() {}
-
