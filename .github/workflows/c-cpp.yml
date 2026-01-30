@@ -10,16 +10,35 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}/vcpkg
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-    
-    - name: Build with Makefile
-      run: make
-    
+
+    - name: Cache vcpkg
+      uses: actions/cache@v4
+      with:
+        path: |
+          vcpkg
+          ~/.cache/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Install vcpkg
+      run: |
+        if [ ! -d "$VCPKG_ROOT" ]; then
+          git clone https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+        fi
+        ./vcpkg/bootstrap-vcpkg.sh
+
+    - name: Configure
+      run: cmake -S . -B build -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+
+    - name: Build
+      run: cmake --build build
+
     - name: Run tests
-      run: ./tests/space_repitition_test
-    
-    - name: Clean up
-      run: make clean
+      run: ctest --test-dir build --output-on-failure
