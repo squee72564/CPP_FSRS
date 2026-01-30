@@ -140,7 +140,7 @@ ReviewLog review_log = scheduling_cards[rating].review_log;
 ### Serialization
 `Card` and `ReviewLog` objects are convertible to an std::unordered_map<std::string ,std::string> via their `toMap` and `fromMap` methods.
 
-Once `Card` and `ReviewLog` objects are in this form you can easily JSON-serializable them via the `unorederedMapToJson` method for easy database storage:
+Once `Card` and `ReviewLog` objects are in this form you can easily JSON-serialize them via `nlohmann::json` for easy database storage:
 
 ```cpp
 // convert to a unordered_map 
@@ -151,13 +151,18 @@ std::unordered_map<std::string ,std::string> review_log_map = review_log.toMap()
 Card new_card = Card::fromMap(card_map);
 ReviewLog new_review_log = ReviewLog::fromMap(review_log_map);
 
+// JSON serialization helpers
+#include <nlohmann/json.hpp>
+
 // Serialize to JSON from map before storage
-std::string json1 = unorderedMapToJson(card_map);
-std::string json2 = unorderedMapToJson(review_log_map);
+nlohmann::json json1 = card_map;
+nlohmann::json json2 = review_log_map;
 
 // Deserialize from JSON to map
-std::unordered_map<std::string, std::string> new_card_map = jsonToUnorderedMap(json1);
-std::unordered_map<std::string, std::string> new_review_log_map = jsonToUnorderedMap(json2);
+std::unordered_map<std::string, std::string> new_card_map =
+    json1.get<std::unordered_map<std::string, std::string>>();
+std::unordered_map<std::string, std::string> new_review_log_map =
+    json2.get<std::unordered_map<std::string, std::string>>();
 ```
 
 ## Reference
