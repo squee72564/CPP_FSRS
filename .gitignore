@@ -1,6 +1,9 @@
 .DS_Store
 build
 
+vcpkg-manifest-install.log
+vcpkg_installed/
+
 # Prerequisites
 *.d
 
